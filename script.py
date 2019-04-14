@@ -1,7 +1,7 @@
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 
-my_url ='https://www.newegg.com/Video-Cards-Video-Devices/Category/ID-38?Tpk=graphics%20cards'
+my_url ='https://steamcommunity.com/market/'
 
 # opening up connection, grabbing the page
 uClient = uReq(my_url)
@@ -12,20 +12,17 @@ uClient.close()
 page_soup = soup(page_html, "html.parser")
 
 # grabs each product
-containers = page_soup.findAll("div",{"class":"item-container"})
+containers = page_soup.findAll("div",{"class":"market_listing_row"})
 
 for container in containers:
-    brand_container = container.findAll("a",{"class":"item-brand"})
-    img = brand_container[0].findAll("img",{"class":"lazy-img"})
-    brand = img[0].get("title").strip()
+    item_container = container.findAll("div",{"class":"market_listing_item_name_block"})    
+    item = item_container[0].span.text
+    game = item_container[0].find("span", class_ ='market_listing_game_name').text
     
-    title_container = container.findAll("a",{"class":"item-title"})
-    product_name = title_container[0].text.strip()
-
-    shipping_container = container.findAll("li",{"class":"price-ship"})
-    shipping = shipping_container[0].text.strip()
-
-    print("brand: " + brand)
-    print("product_name: " + product_name)
-    print("shipping: " + shipping)
+    prices_container = container.findAll("div",{"class":"market_listing_right_cell"})
+    price = prices_container[1].span.span.text
+    
+    print("item: " + item)
+    print("Game: " + game)
+    print("Price: " + price)
 
