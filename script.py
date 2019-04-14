@@ -14,6 +14,13 @@ page_soup = soup(page_html, "html.parser")
 # grabs each product
 containers = page_soup.findAll("div",{"class":"market_listing_row"})
 
+filename = "SteamItems.csv"
+f = open(filename, "w")
+
+headers = "Item, Game, Price\n"
+
+f.write(headers)
+
 for container in containers:
     item_container = container.findAll("div",{"class":"market_listing_item_name_block"})    
     item = item_container[0].span.text
@@ -25,4 +32,7 @@ for container in containers:
     print("item: " + item)
     print("Game: " + game)
     print("Price: " + price)
+    
+    f.write(item + "," + game + "," + price + "\n")
 
+f.close()
