@@ -39,12 +39,15 @@ while True:
     driver.execute_script("window.scrollTo(0, {screen_height}*{i});".format(screen_height=screen_height, i=i))
     i += 1
     time.sleep(scroll_pause_time)
-    if screen_height * i > 500:#600000:
+    if screen_height * i > 600000:
         break
 
 names = {
     'Valve Index VR Kit':1,
-    'Valve Index® Controllers':1
+    'Valve Index® Controllers':1,
+    'Valve Index Headset + Controllers':1,
+    'Oops, sorry!':1,
+    'Face Gasket for Valve Index Headset – 2 Pack':1
 }
 
 soup = BeautifulSoup(driver.page_source, features="lxml")
@@ -87,7 +90,9 @@ for game in soup.find_all("a",{"class":"search_result_row"}):
     if not price:
         price = gsoup.find("div",{"class":"discount_final_price"})
     if not price:
-        price = gsoup.find("div",{"class":"your_price_label"}).find_next_sibling()
+        price = gsoup.find("div",{"class":"your_price_label"})
+        if price:
+            price = price.find_next_sibling()
 
     if price:
         price = price.text
@@ -111,29 +116,41 @@ for game in soup.find_all("a",{"class":"search_result_row"}):
     if (not devs):
         developer_tag = gsoup.find("b",text="Developer:")
         developers = []
-        for sibling in developer_tag.next_siblings:
-            if sibling.name == "a":
-                developers.append(sibling.text)
-            else:
-                break
+        if developer_tag:
+            for sibling in developer_tag.next_siblings:
+                if sibling.name == "a":
+                    developers.append(sibling.text)
+                else:
+                    break
         publisher_tag = gsoup.find("b",text="Publisher:")
         publishers = []
-        for sibling in publisher_tag.next_siblings:
-            if sibling.name == "a":
-                publishers.append(sibling.text)
-            else:
-                break 
+        if publisher_tag:
+            for sibling in publisher_tag.next_siblings:
+                if sibling.name == "a":
+                    publishers.append(sibling.text)
+                else:
+                    break 
     else:
         developers = gsoup.find("div",{"class":"dev_row"})
-        publishers = gsoup.find("div",{"class":"dev_row"}).find_next_sibling()
-        developers = developers.find_all("a", href=True)
-        publishers = publishers.find_all("a", href=True)
+        publishers = gsoup.find("div",{"class":"dev_row"})
+        if publishers:
+            publishers = publishers.find_next_sibling()
+            if publishers:
+                publishers = publishers.find_all("a", href=True)
+        if developers:
+            developers = developers.find_all("a", href=True)
     developer_string = ""
     publisher_string = ""
-    for developer in developers:
-        developer_string += developer.text + ", "
-    for publisher in publishers:
-        publisher_string += publisher.text + ", "
+    if developers:
+        for developer in developers:
+            developer_string += developer.text + ", "
+    else:
+        developer_string = "N/A"
+    if publishers:
+        for publisher in publishers:
+            publisher_string += publisher.text + ", "
+    else:
+        publisher_string = "N/A"
 
     #reviews
     reviews = gsoup.findAll("span",{"class":"responsive_reviewdesc_short"})
